@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 from starlette import status
+from starlette.config import Config
 
 from database import get_db
 from domain.user import user_crud, user_schema
@@ -19,8 +20,10 @@ router = APIRouter(
 def user_create(_user_create: user_schema.UserCreate, db: Session = Depends(get_db)):
     user_crud.create_user(db=db, user_create=_user_create)
     
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
-SECRET_KEY = '99b63ce2bb99961d3d5487510c1b7eb201887767d83ef02c7e0b524f19038f49'
+
+config = Config('.env')
+ACCESS_TOKEN_EXPIRE_MINUTES = int(config('ACCESS_TOKEN_EXPIRE_MINUTES'))
+SECRET_KEY = config('SECRET_KEY')
 ALGORITHM = 'HS256'
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/user/login')
 
@@ -63,7 +66,7 @@ def get_current_user(token: str = Depends(oauth2_scheme),
         if username is None:
             raise credentials_exception
     except JWTError:
-        credentials_exception
+        raise credentials_exception
     else:
         user= user_crud.get_user(db, username=username)
         if user is None:

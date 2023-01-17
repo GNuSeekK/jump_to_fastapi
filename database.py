@@ -3,8 +3,10 @@ import contextlib # 의존성 주입
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from starlette.config import Config
 
-SQLALCHEMY_DATABASE_URL = 'sqlite:///./jump_to_fastapi.db' # 디비 접속 주소, 프로젝트 루트 디렉터리에 저장한다는 의미
+config = Config('.env')
+SQLALCHEMY_DATABASE_URL = Config('SQLALCHEMY_DATABASE_URL') # 디비 접속 주소, 프로젝트 루트 디렉터리에 저장한다는 의미
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={'check_same_thread' : False}
